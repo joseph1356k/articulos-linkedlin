@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Radar de Opinión LinkedIn · Miracle AI · Edición 01</title>
+<style>
+  :root{
+    --paper:#f7f5f0;
+    --ink:#101828;
+    --ink-soft:#475467;
+    --ink-faint:#98a2b3;
+    --teal:#0f766e;
+    --teal-soft:#e6f2f0;
+    --card:#ffffff;
+    --line:#e4e0d8;
+    --gold:#b45309;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px 80px;}
+
+  /* ===== HEADER ===== */
+  header{
+    padding:56px 0 36px;
+    border-bottom:3px solid var(--ink);
+    margin-bottom:8px;
+  }
+  .kicker{
+    display:flex;align-items:center;gap:12px;
+    font-size:12px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--teal);font-weight:700;margin-bottom:14px;
+  }
+  .kicker .dot{width:8px;height:8px;border-radius:50%;background:var(--teal);}
+  h1{
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:clamp(34px,5vw,56px);
+    line-height:1.08;font-weight:700;letter-spacing:-0.01em;
+  }
+  h1 em{font-style:italic;color:var(--teal);}
+  .subtitle{
+    margin-top:16px;font-size:17px;color:var(--ink-soft);max-width:720px;
+  }
+  .meta-row{
+    display:flex;flex-wrap:wrap;gap:10px;margin-top:22px;
+  }
+  .meta-chip{
+    font-size:12.5px;font-weight:600;color:var(--ink-soft);
+    background:var(--card);border:1px solid var(--line);
+    border-radius:999px;padding:6px 14px;
+  }
+
+  /* ===== HOW TO ===== */
+  .howto{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:14px;
+    padding:26px 0 10px;
+  }
+  .howto div{
+    background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-size:13.5px;color:var(--ink-soft);
+  }
+  .howto b{display:block;color:var(--ink);font-size:13px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;}
+
+  /* ===== CARD ===== */
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:18px;
+    margin-top:40px;
+    overflow:hidden;
+    box-shadow:0 1px 2px rgba(16,24,40,.04), 0 8px 24px rgba(16,24,40,.05);
+  }
+  .card-top{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:16px;flex-wrap:wrap;
+    padding:20px 28px;
+    border-bottom:1px solid var(--line);
+    background:linear-gradient(to right, #fbfaf7, #ffffff);
+  }
+  .card-num{
+    display:flex;align-items:center;gap:14px;
+  }
+  .num{
+    font-family:Georgia,serif;font-size:30px;font-weight:700;color:var(--ink);
+    opacity:.18;line-height:1;
+  }
+  .card-title{
+    font-family:Georgia,serif;font-size:20px;font-weight:700;line-height:1.25;
+  }
+  .badges{display:flex;gap:8px;flex-wrap:wrap;}
+  .badge{
+    font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+    padding:5px 12px;border-radius:999px;white-space:nowrap;
+  }
+  .b-dolor{background:#fdecec;color:#b42318;}
+  .b-evidencia{background:#e8eefc;color:#1d4ed8;}
+  .b-debate{background:#f3ebfc;color:#7e22ce;}
+  .b-tendencia{background:#e6f6ec;color:#15803d;}
+  .b-colombia{background:#fdf6dd;color:#a16207;}
+  .b-humano{background:#fdeee2;color:#c2410c;}
+  .b-orden{background:var(--ink);color:#fff;}
+
+  .card-body{
+    display:grid;grid-template-columns:5fr 7fr;
+  }
+  @media (max-width:860px){
+    .card-body{grid-template-columns:1fr;}
+    .howto{grid-template-columns:1fr;}
+    .news-col{border-right:none !important;border-bottom:1px solid var(--line);}
+  }
+
+  /* ---- news column ---- */
+  .news-col{
+    padding:26px 28px 30px;
+    border-right:1px solid var(--line);
+    background:#fbfaf7;
+  }
+  .col-label{
+    font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--gold);margin-bottom:12px;
+  }
+  .news-headline{
+    font-family:Georgia,serif;font-size:17.5px;font-weight:700;line-height:1.35;
+    margin-bottom:10px;
+  }
+  .news-summary{font-size:14px;color:var(--ink-soft);margin-bottom:16px;}
+  .facts{list-style:none;margin-bottom:18px;}
+  .facts li{
+    font-size:13.5px;color:var(--ink);
+    padding:7px 0 7px 20px;position:relative;
+    border-bottom:1px dashed var(--line);
+  }
+  .facts li:last-child{border-bottom:none;}
+  .facts li::before{
+    content:"→";position:absolute;left:0;color:var(--teal);font-weight:700;
+  }
+  .facts b{color:var(--teal);}
+  .sources{margin-top:6px;}
+  .sources a{
+    display:inline-block;font-size:12px;font-weight:600;color:var(--teal);
+    text-decoration:none;background:var(--teal-soft);
+    border-radius:6px;padding:4px 10px;margin:0 6px 6px 0;
+  }
+  .sources a:hover{text-decoration:underline;}
+  .angle{
+    margin-top:16px;padding:12px 14px;
+    background:#fff;border-left:3px solid var(--gold);
+    border-radius:0 8px 8px 0;
+    font-size:13px;color:var(--ink-soft);
+  }
+  .angle b{color:var(--ink);}
+
+  /* ---- post column ---- */
+  .post-col{padding:26px 28px 30px;}
+  .post-head{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    margin-bottom:14px;
+  }
+  .post-frame{
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:22px 24px;
+    background:#fff;
+  }
+  .post-text{
+    white-space:pre-wrap;
+    font-size:14.5px;
+    line-height:1.65;
+    color:var(--ink);
+  }
+  .copy-btn{
+    font-size:12.5px;font-weight:700;
+    color:#fff;background:var(--ink);
+    border:none;border-radius:8px;
+    padding:9px 16px;cursor:pointer;
+    transition:background .15s;
+    white-space:nowrap;
+  }
+  .copy-btn:hover{background:var(--teal);}
+  .copy-btn.copied{background:var(--teal);}
+
+  /* ===== GUIDE ===== */
+  .guide{
+    margin-top:56px;background:var(--ink);color:#fff;
+    border-radius:18px;padding:36px 34px;
+  }
+  .guide h2{
+    font-family:Georgia,serif;font-size:24px;margin-bottom:6px;
+  }
+  .guide .g-sub{color:#c9d2e0;font-size:14px;margin-bottom:24px;}
+  .cal{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:26px;
+  }
+  @media (max-width:860px){.cal{grid-template-columns:1fr;}}
+  .cal div{
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:10px;padding:14px 16px;font-size:13.5px;color:#e5eaf2;
+  }
+  .cal b{display:block;color:#fff;font-size:12px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px;color:#7dd3c8;}
+  .tips{list-style:none;}
+  .tips li{
+    font-size:14px;color:#dbe2ec;padding:6px 0 6px 24px;position:relative;
+  }
+  .tips li::before{content:"✓";position:absolute;left:0;color:#7dd3c8;font-weight:700;}
+
+  footer{
+    margin-top:36px;text-align:center;font-size:12.5px;color:var(--ink-faint);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kicker"><span class="dot"></span>MIRACLE AI · SERIE DE AUTORIDAD EN LINKEDIN</div>
+  <h1>Radar de Opinión <em>N.º 01</em></h1>
+  <p class="subtitle">Seis noticias médicas recientes y verificadas, cada una convertida en un artículo de opinión listo para publicar. El objetivo: construir una voz de autoridad sobre el futuro del trabajo clínico — informando, provocando conversación y conectando con el dolor real del médico.</p>
+  <div class="meta-row">
+    <span class="meta-chip">📅 Edición: agosto 2026</span>
+    <span class="meta-chip">✍️ Voz: primera persona, fundador construyendo en salud + IA</span>
+    <span class="meta-chip">🎯 Audiencia: médicos, directivos de salud, ecosistema salud LatAm</span>
+    <span class="meta-chip">📊 Todas las cifras con fuente enlazada</span>
+  </div>
+</header>
+
+<div class="howto">
+  <div><b>1 · Lee la noticia</b>Columna izquierda: el hecho, las cifras clave y los enlaces a la fuente original por si quieres profundizar antes de publicar.</div>
+  <div><b>2 · Copia el artículo</b>Columna derecha: el post completo con su hook, desarrollo, cierre con pregunta y hashtags. Botón «Copiar» y pegar directo en LinkedIn.</div>
+  <div><b>3 · Sigue el calendario</b>Al final encuentras el orden de publicación sugerido y las reglas de oro para que la serie construya autoridad de verdad.</div>
+</div>
+
+<!-- ============ CARD 1 ============ -->
+<div class="card">
+  <div class="card-top">
+    <div class="card-num">
+      <span class="num">01</span>
+      <span class="card-title">Nadie estudió 10 años para hacer clic</span>
+    </div>
+    <div class="badges">
+      <span class="badge b-dolor">🔴 Punto de dolor</span>
+      <span class="badge b-orden">Publicar 1.º</span>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="news-col">
+      <div class="col-label">La noticia</div>
+      <div class="news-headline">El burnout médico por fin baja… pero el tiempo de documentación fuera de horario («pajama time») no se mueve.</div>
+      <p class="news-summary">Los datos de la AMA (encuesta a 12.400+ médicos) muestran mejora en burnout, pero el tiempo nocturno en la historia clínica electrónica sigue intacto. Análisis de 2026 confirman la magnitud del problema.</p>
+      <ul class="facts">
+        <li>Casi <b>2 horas administrativas</b> por cada hora de atención directa al paciente.</li>
+        <li>En promedio <b>4,5 horas al día</b> dentro de la historia clínica electrónica (revisión de 10 estudios).</li>
+        <li><b>1 de cada 5 médicos (20,9%)</b> pasa más de 8 horas semanales en el EHR fuera de horario laboral.</li>
+        <li>El burnout baja, el «pajama time» <b>no cambia</b>: se tolera mejor el problema, no se elimina.</li>
+      </ul>
+      <div class="sources">
+        <a href="https://www.ama-assn.org/practice-management/physician-health/burnout-way-down-pajama-time-stands-still" target="_blank">AMA</a>
+        <a href="https://www.bartonassociates.com/blog/physician-burnout-remains-high-in-2026-see-latest-rates-top-causes-and-how-staffing-shortages-and-schedule-control-impact-clinicians/" target="_blank">Análisis 2026</a>
+        <a href="https://www.medicaleconomics.com/view/physicians-spend-4-5-hours-a-day-on-electronic-health-records" target="_blank">Medical Economics</a>
+      </div>
+      <div class="angle"><b>Ángulo:</b> abrir la serie con el dolor más universal de la audiencia. Post diseñado para que el médico se sienta visto y comente. Máximo potencial de alcance.</div>
+    </div>
+    <div class="post-col">
+      <div class="post-head">
+        <div class="col-label">El artículo de opinión</div>
+        <button class="copy-btn" onclick="copyPost('post1',this)">📋 Copiar post</button>
+      </div>
+      <div class="post-frame">
+<div class="post-text" id="post1">Nadie estudia medicina durante 10 años para pasar el día haciendo clic.
+
+Pero los datos dicen otra cosa:
+
+→ Por cada hora con un paciente, un médico dedica casi 2 horas a tareas administrativas y de registro.
+→ En promedio, 4,5 horas al día dentro de la historia clínica electrónica.
+→ 1 de cada 5 médicos pasa más de 8 horas SEMANALES documentando fuera de su horario: de noche, en la casa, los domingos. Los investigadores le pusieron nombre: "pajama time".
+
+Y aquí viene lo que más me inquieta.
+
+El burnout médico ha empezado a bajar en los últimos dos años. El tiempo de documentación fuera de horario no se ha movido ni un milímetro.
+
+Traducción: estamos aprendiendo a soportar mejor el problema, no a eliminarlo.
+
+Cuando un médico pasa la consulta mirando la pantalla en vez de mirar al paciente, no es un problema de vocación. Es un problema de diseño. El software hospitalario se diseñó para registrar y facturar, no para cuidar.
+
+Los pacientes lo sienten. Los médicos lo cargan. Y los sistemas de salud lo pagan: consultas más lentas, más errores, más renuncias.
+
+La tecnología creó este problema. Y le va a tocar resolverlo: la próxima generación de herramientas clínicas no puede pedirle al médico que escriba más. Tiene que escribir por él. Y después, ejecutar por él.
+
+Pregunta para los médicos que me leen: de su última semana, ¿cuántas horas se fueron en documentar y no en atender?
+
+#BurnoutMédico #SaludDigital #IAenSalud #HistoriaClínica</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CARD 2 ============ -->
+<div class="card">
+  <div class="card-top">
+    <div class="card-num">
+      <span class="num">02</span>
+      <span class="card-title">Su próximo paciente ya consultó con una IA</span>
+    </div>
+    <div class="badges">
+      <span class="badge b-tendencia">🟢 Curiosidad / tendencia</span>
+      <span class="badge b-orden">Publicar 2.º</span>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="news-col">
+      <div class="col-label">La noticia</div>
+      <div class="news-headline">Google publica resultados de SymptomAI: su asistente de síntomas sobre Gemini, probado con casi 14.000 personas reales en la app de Fitbit.</div>
+      <p class="news-summary">Preprint publicado en mayo de 2026 y cubierto por prensa tecnológica en julio. Es uno de los despliegues reales (no simulados) más grandes de IA conversacional de síntomas hasta la fecha.</p>
+      <ul class="facts">
+        <li><b>13.917 participantes reales</b> describieron sus síntomas con sus propias palabras (jun 2025 – abr 2026).</li>
+        <li>La IA incluyó el diagnóstico correcto en su top-5 el <b>73%</b> de las veces; médicos revisando las mismas transcripciones: <b>60%</b>.</li>
+        <li>Hacer <b>preguntas activas</b> mejoró la precisión un <b>27%</b> frente a solo escuchar.</li>
+        <li>Es un <b>prototipo de investigación</b>: sin aprobación regulatoria, no apto para diagnóstico.</li>
+      </ul>
+      <div class="sources">
+        <a href="https://www.techtimes.com/articles/321455/20260724/google-ai-outdiagnoses-doctors-study-nearly-14000-real-patients.htm" target="_blank">TechTimes (jul 2026)</a>
+      </div>
+      <div class="angle"><b>Ángulo:</b> curiosidad + espejo incómodo. El giro final (pacientes con IA de punta vs. médicos con software de hace 20 años) siembra la tesis de Miracle sin venderla.</div>
+    </div>
+    <div class="post-col">
+      <div class="post-head">
+        <div class="col-label">El artículo de opinión</div>
+        <button class="copy-btn" onclick="copyPost('post2',this)">📋 Copiar post</button>
+      </div>
+      <div class="post-frame">
+<div class="post-text" id="post2">Su próximo paciente ya consultó con una IA antes de entrar al consultorio.
+
+Google acaba de publicar los resultados de SymptomAI, un asistente de síntomas construido sobre Gemini y probado dentro de la app de Fitbit.
+
+No fue una simulación: 13.917 personas reales describieron sus síntomas con sus propias palabras, entre junio de 2025 y abril de 2026.
+
+Los números:
+
+→ La IA incluyó el diagnóstico correcto entre sus 5 primeras opciones en el 73% de los casos.
+→ Médicos revisando exactamente las mismas conversaciones: 60%.
+→ El factor que más mejoró la precisión (+27%): hacer preguntas activas en lugar de solo escuchar.
+
+Me quedo con dos reflexiones.
+
+La primera es casi poética: lo que hizo mejor a la IA fue lo que la buena medicina ha hecho siempre. Preguntar bien. La anamnesis sigue siendo la reina, incluso para las máquinas.
+
+La segunda es incómoda: el paciente llega hoy al consultorio con una IA de última generación en el bolsillo… y el médico lo recibe con un software diseñado hace 20 años, lleno de campos, clics y pantallas que no conversan entre sí.
+
+Esa asimetría no es sostenible. Si los pacientes tienen IA, los médicos necesitan una mejor.
+
+(Aclaración importante: SymptomAI es un prototipo de investigación, sin aprobación regulatoria. Nadie debería usarlo para autodiagnosticarse. Pero la dirección es clarísima.)
+
+¿Ya les pasa? ¿Pacientes que llegan con su "prediagnóstico" hecho por IA? ¿Cómo lo están manejando?
+
+#SaludDigital #IAenSalud #RelaciónMédicoPaciente #InnovaciónEnSalud</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CARD 3 ============ -->
+<div class="card">
+  <div class="card-top">
+    <div class="card-num">
+      <span class="num">03</span>
+      <span class="card-title">2025: el año en que los escribas de IA se volvieron evidencia</span>
+    </div>
+    <div class="badges">
+      <span class="badge b-evidencia">🔵 Análisis con evidencia</span>
+      <span class="badge b-orden">Publicar 3.º</span>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="news-col">
+      <div class="col-label">La noticia</div>
+      <div class="news-headline">Tres estudios (JAMA Network Open, UChicago Medicine y Kaiser Permanente) confirman que la IA ambiental reduce burnout y tiempo de documentación a gran escala.</div>
+      <p class="news-summary">Entre octubre de 2025 y febrero de 2026 se consolidó el cuerpo de evidencia más sólido hasta ahora sobre escribas de IA ambiental en la práctica real.</p>
+      <ul class="facts">
+        <li>JAMA Network Open (oct 2025): 250+ clínicos en <b>6 sistemas de salud</b> → menos burnout, menor carga cognitiva, menos documentación fuera de horario.</li>
+        <li>UChicago Medicine: <b>−8,5%</b> de tiempo total en el EHR y <b>−15%</b> en escritura de notas.</li>
+        <li>Kaiser Permanente (TPMG): <b>7.260 médicos, 2,5 millones de consultas</b> → ~15.791 horas de documentación ahorradas (~1.800 jornadas laborales).</li>
+        <li>Otro estudio: burnout de clínicos ambulatorios cayó de <b>51,9% a 38,8%</b> tras 30 días de documentación asistida por IA.</li>
+      </ul>
+      <div class="sources">
+        <a href="https://www.advisory.com/daily-briefing/2026/02/04/ambient-ai-oi-ec" target="_blank">Advisory Board (feb 2026)</a>
+        <a href="https://jamanetwork.com/journals/jamanetworkopen/fullarticle/2839542" target="_blank">JAMA Netw Open</a>
+        <a href="https://www.bartonassociates.com/blog/physician-burnout-remains-high-in-2026-see-latest-rates-top-causes-and-how-staffing-shortages-and-schedule-control-impact-clinicians/" target="_blank">Datos 2026</a>
+      </div>
+      <div class="angle"><b>Ángulo:</b> el post de autoridad técnica. Demuestra que dominas la literatura y posiciona tu tesis diferenciadora: documentar es el capítulo 1, operar es el capítulo 2 (= Miracle Operations, sin nombrarlo).</div>
+    </div>
+    <div class="post-col">
+      <div class="post-head">
+        <div class="col-label">El artículo de opinión</div>
+        <button class="copy-btn" onclick="copyPost('post3',this)">📋 Copiar post</button>
+      </div>
+      <div class="post-frame">
+<div class="post-text" id="post3">Durante años, los "escribas de IA" fueron una promesa. Desde finales de 2025, son evidencia publicada.
+
+Tres datos que todo médico y todo directivo de salud debería conocer:
+
+1. JAMA Network Open (octubre 2025): más de 250 clínicos en 6 sistemas de salud reportaron menos burnout, menor carga cognitiva y menos documentación fuera de horario usando IA ambiental.
+
+2. University of Chicago Medicine: la IA ambiental redujo 8,5% el tiempo total en la historia clínica y más de 15% el tiempo escribiendo notas. Suena poco: son 2-3 minutos por paciente. Multiplíquelos por 25 pacientes al día, por 20 días al mes.
+
+3. Kaiser Permanente: 7.260 médicos, 2,5 millones de consultas. Resultado: cerca de 15.791 horas de documentación ahorradas. Casi 1.800 jornadas laborales completas devueltas a los médicos. Y en otro estudio, el burnout ambulatorio cayó de 51,9% a 38,8% en apenas 30 días de uso.
+
+La discusión de "¿funcionará?" se acabó. Ahora viene la pregunta importante.
+
+La nota clínica era solo la parte visible del iceberg. Debajo está todo lo que viene DESPUÉS de la consulta: órdenes, formularios, registros en el sistema hospitalario, autorizaciones, la misma información digitada tres veces en tres pantallas distintas.
+
+La IA ambiental convirtió al médico de autor en editor. Excelente. Pero el siguiente salto es más grande: sistemas que no solo escriben lo que pasó en la consulta, sino que ejecutan lo que sigue.
+
+Documentar era el capítulo 1. Operar es el capítulo 2. Y ahí es donde se va a definir la próxima década del software en salud.
+
+¿En su institución ya evaluaron IA ambiental o siguen esperando "a que madure"? La evidencia dice que ya maduró.
+
+#IAenSalud #BurnoutMédico #GestiónClínica #InnovaciónEnSalud</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CARD 4 ============ -->
+<div class="card">
+  <div class="card-top">
+    <div class="card-num">
+      <span class="num">04</span>
+      <span class="card-title">Una IA superó a los médicos en urgencias (y no es lo que parece)</span>
+    </div>
+    <div class="badges">
+      <span class="badge b-debate">🟣 Debate / futuro</span>
+      <span class="badge b-orden">Publicar 4.º</span>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="news-col">
+      <div class="col-label">La noticia</div>
+      <div class="news-headline">Science publica un estudio de Harvard y Beth Israel Deaconess: un modelo de razonamiento de OpenAI superó a médicos experimentados en precisión diagnóstica con casos reales de urgencias.</div>
+      <p class="news-summary">Abril de 2026. A diferencia de estudios anteriores con viñetas de examen, este usó historias clínicas reales y desordenadas de un servicio de urgencias, evaluando a la IA en tres momentos de la atención.</p>
+      <ul class="facts">
+        <li>Casos <b>reales</b> de urgencias del Beth Israel Deaconess + casos del NEJM, no viñetas académicas.</li>
+        <li>La IA fue más precisa que los médicos del estudio en <b>tres momentos</b>: triage, evaluación y admisión.</li>
+        <li>Usó <b>solo el texto</b> de la historia disponible en cada momento: sin examen físico, sin señales no verbales.</li>
+        <li>Los propios autores: es precisión diagnóstica en retrospectiva, <b>no práctica clínica real</b>.</li>
+      </ul>
+      <div class="sources">
+        <a href="https://www.npr.org/2026/04/30/nx-s1-5804474/ai-doctors-openai-patient-care-diagnosis" target="_blank">NPR (abr 2026)</a>
+      </div>
+      <div class="angle"><b>Ángulo:</b> tomar la noticia más "amenazante" del año y convertirla en un mensaje pro-médico. El analogía del estetoscopio da un frame memorable. Posiciona criterio, no miedo ni hype.</div>
+    </div>
+    <div class="post-col">
+      <div class="post-head">
+        <div class="col-label">El artículo de opinión</div>
+        <button class="copy-btn" onclick="copyPost('post4',this)">📋 Copiar post</button>
+      </div>
+      <div class="post-frame">
+<div class="post-text" id="post4">Una IA superó a médicos experimentados diagnosticando en urgencias. Mi conclusión no es la que esperan.
+
+Science publicó en abril un estudio que hace cinco años habría sonado a ciencia ficción.
+
+Investigadores de Harvard y Beth Israel Deaconess probaron un modelo de razonamiento de OpenAI con casos reales de urgencias. No viñetas perfectas de examen: historias clínicas reales, con datos desordenados, incompletos, contradictorios. La medicina como es.
+
+El resultado: el modelo fue más preciso que los médicos del estudio en tres momentos de la atención — desde el triage hasta la admisión — usando exactamente la misma información disponible en cada punto.
+
+¿Significa que la IA va a reemplazar a los médicos? No.
+
+El estudio tiene letra pequeña importante: la IA solo leyó texto. No examinó al paciente. No escuchó su tono de voz. No vio su cara de dolor. No tomó decisiones bajo presión con la familia al lado. Y acertar un diagnóstico en retrospectiva no es lo mismo que ejercer la medicina.
+
+Pero descartar el hallazgo sería igual de equivocado.
+
+Cuando apareció el estetoscopio, hubo médicos que lo consideraron un insulto al oído clínico. Hoy nadie ausculta sin él.
+
+La pregunta correcta no es "¿me va a reemplazar la IA?"
+
+Es: "¿quién va a atender mejor — el médico que la usa con criterio o el que la ignora por principio?"
+
+El juicio clínico no está en riesgo. Lo que está cambiando es la caja de herramientas. Y la brecha entre quienes la adopten y quienes no va a ser cada vez más difícil de cerrar.
+
+¿Ya usan IA en su práctica diaria, o todavía le tienen distancia? Me interesa leer ambos lados.
+
+#InteligenciaArtificial #Diagnóstico #FuturoDeLaMedicina #IAenSalud</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CARD 5 ============ -->
+<div class="card">
+  <div class="card-top">
+    <div class="card-num">
+      <span class="num">05</span>
+      <span class="card-title">Colombia encendió la historia clínica interoperable</span>
+    </div>
+    <div class="badges">
+      <span class="badge b-colombia">🟡 Colombia / local</span>
+      <span class="badge b-orden">Publicar 5.º</span>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="news-col">
+      <div class="col-label">La noticia</div>
+      <div class="news-headline">Desde el 15 de abril de 2026 opera la interoperabilidad de historia clínica en Colombia: 7,7 millones de resúmenes intercambiados. Y en julio, Minsalud publicó el borrador que moderniza las reglas vigentes desde 1999.</div>
+      <p class="news-summary">Dos movimientos regulatorios simultáneos que redefinen la documentación clínica en el país — con plazos concretos para IPS y profesionales.</p>
+      <ul class="facts">
+        <li>Mecanismo operativo desde el <b>15 de abril de 2026</b>; ya van <b>7,7 millones</b> de Resúmenes Digitales de Atención de <b>2,7 millones de pacientes</b>.</li>
+        <li><b>744 prestadores</b> conectados (2.456 sedes) y <b>1.087 IPS más</b> en proceso de incorporación.</li>
+        <li>Borrador de Minsalud (jul 2026): deroga la Resolución 1995 de 1999 y da <b>18 meses</b> para implementar sistemas electrónicos con firma digital y trazabilidad.</li>
+        <li>Más estandarización = <b>más campos estructurados</b> que alguien tendrá que llenar.</li>
+      </ul>
+      <div class="sources">
+        <a href="https://consultorsalud.com/historia-clinica-electronica-registros-interop/" target="_blank">ConsultorSalud (jun 2026)</a>
+        <a href="https://consultorsalud.com/minsalud-reglas-historia-clinica-electronica/" target="_blank">ConsultorSalud (jul 2026)</a>
+      </div>
+      <div class="angle"><b>Ángulo:</b> el post que nadie más en tu red está escribiendo. Autoridad local + advertencia con datos de EE. UU. Posiciona la tesis "interoperabilidad + automatización" que es exactamente el terreno de Miracle.</div>
+    </div>
+    <div class="post-col">
+      <div class="post-head">
+        <div class="col-label">El artículo de opinión</div>
+        <button class="copy-btn" onclick="copyPost('post5',this)">📋 Copiar post</button>
+      </div>
+      <div class="post-frame">
+<div class="post-text" id="post5">Colombia encendió la historia clínica interoperable. Ahora viene la parte difícil.
+
+Silenciosamente, el país está viviendo uno de los cambios más importantes de su sistema de salud en décadas:
+
+→ Desde el 15 de abril de 2026 opera el mecanismo de interoperabilidad de historia clínica electrónica.
+→ Ya se intercambiaron 7,7 millones de resúmenes digitales de atención, de 2,7 millones de pacientes.
+→ 744 prestadores conectados y más de 1.000 IPS adicionales en proceso.
+→ Y en julio, Minsalud publicó el borrador que moderniza de raíz las reglas de historia clínica (la norma vigente es de 1999), con 18 meses de plazo para implementar sistemas electrónicos con firma digital y trazabilidad completa.
+
+Como colombiano construyendo tecnología para salud, esto me entusiasma. Y también me preocupa.
+
+Porque interoperabilidad significa más datos estructurados, más campos estandarizados, más trazabilidad. Todo necesario. Pero hay una pregunta que casi nadie está haciendo:
+
+¿Quién va a digitar todo eso?
+
+Si la respuesta es "el médico, a mano, en cada consulta", habremos construido una autopista de datos pagada con horas de teclado del personal clínico.
+
+Estados Unidos ya cometió ese error: logró historia clínica electrónica casi universal… y hoy sus médicos pasan más de 4 horas diarias frente a la pantalla, con el trabajo administrativo como primera causa de burnout.
+
+Colombia tiene la oportunidad de saltarse esa generación de errores: combinar interoperabilidad con captura automática. Que la información nazca de la conversación clínica, y la IA la estructure y la registre — en lugar de sumarle clics al médico.
+
+La autopista ya está construida. La pregunta es si la vamos a llenar con dedos o con inteligencia.
+
+¿Cómo lo están viviendo en sus instituciones? ¿La interoperabilidad les ha quitado trabajo o les ha sumado?
+
+#SaludColombia #Interoperabilidad #HistoriaClínicaElectrónica #SaludDigital</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CARD 6 ============ -->
+<div class="card">
+  <div class="card-top">
+    <div class="card-num">
+      <span class="num">06</span>
+      <span class="card-title">El burnout no se cura con yoga</span>
+    </div>
+    <div class="badges">
+      <span class="badge b-humano">🟠 Humano / reflexivo</span>
+      <span class="badge b-orden">Publicar 6.º</span>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="news-col">
+      <div class="col-label">La noticia</div>
+      <div class="news-headline">El burnout médico baja a 41,9% según la AMA — pero 1 de cada 4 médicos considera dejar la práctica clínica por carga administrativa, mientras la OMS proyecta un déficit de 11,1 millones de trabajadores de salud para 2030.</div>
+      <p class="news-summary">Los reportes de 2026 muestran una paradoja: mejora el indicador, pero la causa raíz (burocracia) sigue intacta y la fuga de talento continúa en un mundo con escasez estructural de personal sanitario.</p>
+      <ul class="facts">
+        <li>Burnout: <b>41,9%</b> en 2025 (vs. 43,2% en 2024 y 53% en 2022) — dos años seguidos de mejora.</li>
+        <li><b>1 de cada 4 médicos</b> planea dejar la medicina clínica; la causa n.º 1 reportada: el trabajo burocrático.</li>
+        <li>Intención de irse en los próximos 2 años: <b>31,1%</b>.</li>
+        <li>OMS: déficit proyectado de <b>11,1 millones</b> de trabajadores de salud para 2030.</li>
+      </ul>
+      <div class="sources">
+        <a href="https://www.bartonassociates.com/blog/physician-burnout-remains-high-in-2026-see-latest-rates-top-causes-and-how-staffing-shortages-and-schedule-control-impact-clinicians/" target="_blank">Barton (may 2026)</a>
+        <a href="https://www.who.int/teams/health-workforce/3" target="_blank">OMS</a>
+        <a href="https://www.ama-assn.org/practice-management/physician-health/burnout-way-down-pajama-time-stands-still" target="_blank">AMA</a>
+      </div>
+      <div class="angle"><b>Ángulo:</b> cierre de la serie con el post más humano y citable. La frase "el burnout es una falla de diseño, no de resiliencia" es la que quieres que asocien contigo. Termina en esperanza, no en queja.</div>
+    </div>
+    <div class="post-col">
+      <div class="post-head">
+        <div class="col-label">El artículo de opinión</div>
+        <button class="copy-btn" onclick="copyPost('post6',this)">📋 Copiar post</button>
+      </div>
+      <div class="post-frame">
+<div class="post-text" id="post6">El burnout médico está bajando. Igual, nadie debería celebrar todavía.
+
+Primero la buena noticia: según la AMA, el burnout médico bajó a 41,9% en 2025. Dos años seguidos de mejora, la cifra más baja en años.
+
+Ahora la parte que no se cuenta tanto:
+
+→ 1 de cada 4 médicos está considerando dejar la práctica clínica. ¿La causa número uno? No es el salario. Es la carga administrativa.
+→ La principal causa reportada de burnout sigue siendo la misma, década tras década: "demasiado trabajo burocrático".
+→ Y mientras tanto, la OMS proyecta un déficit de 11,1 millones de trabajadores de salud para 2030.
+
+Piensen en esa combinación un segundo.
+
+El mundo no tiene médicos de sobra. Y estamos usando a los que tenemos para llenar formularios.
+
+Durante años, la respuesta institucional al burnout fue tratar el síntoma en el individuo: talleres de resiliencia, pausas activas, yoga. Como si el problema fuera que al médico le falta actitud — y no que le sobran dos horas de pantalla por cada hora de paciente.
+
+Digámoslo claro: el burnout no es una falla de resiliencia. Es una falla de diseño de sistemas.
+
+Y justamente por eso soy optimista. Porque por primera vez, el rediseño es técnicamente posible. La IA ya demostró que puede absorber gran parte del trabajo de documentación. El siguiente paso es que absorba lo que viene después de cada consulta: los registros, las órdenes, los formularios, los sistemas.
+
+Cada hora administrativa que le devolvemos a un médico es una consulta más para un paciente que la necesita. O una pausa real. O simplemente una cena a tiempo con su familia.
+
+No conozco mejor caso de uso para la inteligencia artificial que ese.
+
+Médicos: ¿qué harían con 10 horas menos de papeleo a la semana?
+
+#BurnoutMédico #SistemasDeSalud #IAenSalud #TalentoHumanoEnSalud</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ GUIDE ============ -->
+<div class="guide">
+  <h2>Guía de publicación de la serie</h2>
+  <p class="g-sub">Tres semanas, dos posts por semana. El orden está pensado como narrativa: dolor → curiosidad → evidencia → debate → autoridad local → cierre humano.</p>
+  <div class="cal">
+    <div><b>Semana 1</b>Martes: Post 01 (el dolor — abre la conversación).<br>Jueves: Post 02 (SymptomAI — curiosidad y alcance).</div>
+    <div><b>Semana 2</b>Martes: Post 03 (evidencia IA ambiental — autoridad técnica).<br>Jueves: Post 04 (IA vs. médicos — el debate).</div>
+    <div><b>Semana 3</b>Martes: Post 05 (Colombia — nadie más lo está escribiendo).<br>Jueves: Post 06 (burnout — el cierre citable).</div>
+  </div>
+  <ul class="tips">
+    <li>Publica entre 7:00 y 9:00 a. m. (hora Colombia): los médicos revisan LinkedIn antes de consulta.</li>
+    <li>Responde TODOS los comentarios de la primera hora — es lo que más pesa en el algoritmo y en la percepción de autoridad.</li>
+    <li>No menciones Miracle AI en cada post. La marca aparece en tu perfil; la autoridad se construye con criterio, no con publicidad. Uno de cada tres posts puede aludir a "lo que estamos construyendo".</li>
+    <li>El hook (primera línea) es el 80% del resultado: LinkedIn corta el texto en ~3 líneas. Nunca edites el hook para "suavizarlo".</li>
+    <li>Cierra siempre con pregunta. Los comentarios de médicos reales son tu mejor contenido futuro.</li>
+    <li>Si un dato genera debate, enlaza la fuente en el primer comentario (no en el post: los enlaces externos reducen alcance).</li>
+    <li>Guarda los comentarios más potentes: son insumo directo para la Edición 02 de este radar.</li>
+  </ul>
+</div>
+
+<footer>
+  Radar de Opinión · Edición 01 · Agosto 2026 — Preparado para la estrategia de autoridad de Miracle AI en LinkedIn.<br>
+  Todas las cifras provienen de las fuentes enlazadas en cada tarjeta. Verificar enlaces antes de citar en prensa.
+</footer>
+
+</div>
+<script>
+function copyPost(id, btn){
+  var el = document.getElementById(id);
+  var text = el.innerText;
+  function done(){
+    var old = btn.textContent;
+    btn.textContent = "✓ Copiado";
+    btn.classList.add("copied");
+    setTimeout(function(){ btn.textContent = old; btn.classList.remove("copied"); }, 2000);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(function(){ fallback(); });
+  } else { fallback(); }
+  function fallback(){
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); done(); } catch(e){}
+    document.body.removeChild(ta);
+  }
+}
+</script>
+</body>
+</html>
