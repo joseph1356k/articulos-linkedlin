@@ -371,20 +371,6 @@ export default function Page() {
             ✅ Publicados ({counts.published})
           </button>
         </div>
-        {sortedPosts.length > 0 && (
-          <div className="toc">
-            {sortedPosts.map((post, idx) => (
-              <a
-                key={post.id}
-                href={`#card-${idx + 1}`}
-                className={post.status === "published" ? "pub" : ""}
-                title={post.title}
-              >
-                {String(idx + 1).padStart(2, "0")}
-              </a>
-            ))}
-          </div>
-        )}
       </div>
 
       <div className="howto">
