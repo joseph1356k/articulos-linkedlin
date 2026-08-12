@@ -3,21 +3,21 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 
-const STATUS_LABEL = {
-  draft: "Borrador",
-  scheduled: "Programado",
-  published: "Publicado",
-};
-
 const EMPTY_FORM = {
   title: "",
   category: "",
+  series: "medicina",
   news_headline: "",
   news_summary: "",
   angle: "",
   facts: "",
   sources: "",
   content: "",
+};
+
+const SERIES_LABEL = {
+  medicina: "🩺 Noticias médicas",
+  politica: "🏛️ Política y sistemas",
 };
 
 function toDatetimeLocalValue(iso) {
@@ -45,6 +45,7 @@ function postToFormValues(post) {
   return {
     title: post.title || "",
     category: post.category || "",
+    series: post.series || "medicina",
     news_headline: post.news_headline || "",
     news_summary: post.news_summary || "",
     angle: post.angle || "",
@@ -60,6 +61,7 @@ function formValuesToPayload(values) {
   return {
     title: values.title.trim(),
     category: values.category.trim(),
+    series: values.series === "politica" ? "politica" : "medicina",
     news_headline: values.news_headline.trim(),
     news_summary: values.news_summary.trim(),
     angle: values.angle.trim(),
@@ -80,6 +82,20 @@ function formValuesToPayload(values) {
   };
 }
 
+function postHaystack(post) {
+  return [
+    post.title,
+    post.content,
+    post.category,
+    post.news_headline,
+    post.news_summary,
+    SERIES_LABEL[post.series] || "",
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+}
+
 export default function Page() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -93,6 +109,8 @@ export default function Page() {
   const [scheduleValue, setScheduleValue] = useState("");
   const [copiedId, setCopiedId] = useState(null);
   const [busyId, setBusyId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeFilter, setActiveFilter] = useState("all");
 
   async function fetchPosts() {
     setLoading(true);
@@ -114,6 +132,8 @@ export default function Page() {
   }, []);
 
   const now = Date.now();
+  const sortedPosts = [...posts].sort((a, b) => a.position - b.position);
+
   const duePosts = useMemo(
     () =>
       posts.filter(
@@ -124,6 +144,35 @@ export default function Page() {
       ),
     [posts, now]
   );
+
+  const counts = useMemo(
+    () => ({
+      all: sortedPosts.length,
+      medicina: sortedPosts.filter((p) => p.series === "medicina").length,
+      politica: sortedPosts.filter((p) => p.series === "politica").length,
+      pending: sortedPosts.filter((p) => p.status !== "published").length,
+      published: sortedPosts.filter((p) => p.status === "published").length,
+    }),
+    [sortedPosts]
+  );
+
+  const query = searchQuery.trim().toLowerCase();
+
+  function matchesFilter(post) {
+    if (activeFilter === "medicina") return post.series === "medicina";
+    if (activeFilter === "politica") return post.series === "politica";
+    if (activeFilter === "pending") return post.status !== "published";
+    if (activeFilter === "published") return post.status === "published";
+    return true;
+  }
+
+  function matchesSearch(post) {
+    return query === "" || postHaystack(post).includes(query);
+  }
+
+  const visibleCount = sortedPosts.filter(
+    (p) => matchesFilter(p) && matchesSearch(p)
+  ).length;
 
   function openCreateForm() {
     setEditingId(null);
@@ -178,11 +227,10 @@ export default function Page() {
   }
 
   async function moveBy(post, direction) {
-    const sorted = [...posts].sort((a, b) => a.position - b.position);
-    const idx = sorted.findIndex((p) => p.id === post.id);
+    const idx = sortedPosts.findIndex((p) => p.id === post.id);
     const targetIdx = idx + direction;
-    if (targetIdx < 0 || targetIdx >= sorted.length) return;
-    const other = sorted[targetIdx];
+    if (targetIdx < 0 || targetIdx >= sortedPosts.length) return;
+    const other = sortedPosts[targetIdx];
     setBusyId(post.id);
     await Promise.all([
       supabase.from("posts").update({ position: other.position }).eq("id", post.id),
@@ -215,23 +263,13 @@ export default function Page() {
     fetchPosts();
   }
 
-  async function clearSchedule(post) {
+  async function togglePublished(post) {
     setBusyId(post.id);
-    const { error } = await supabase
-      .from("posts")
-      .update({ status: "draft", scheduled_at: null })
-      .eq("id", post.id);
-    if (error) setError(error.message);
-    setBusyId(null);
-    fetchPosts();
-  }
-
-  async function markPublished(post) {
-    setBusyId(post.id);
-    const { error } = await supabase
-      .from("posts")
-      .update({ status: "published", published_at: new Date().toISOString() })
-      .eq("id", post.id);
+    const goingLive = post.status !== "published";
+    const patch = goingLive
+      ? { status: "published", published_at: new Date().toISOString() }
+      : { status: "draft", scheduled_at: null, published_at: null };
+    const { error } = await supabase.from("posts").update(patch).eq("id", post.id);
     if (error) setError(error.message);
     setBusyId(null);
     fetchPosts();
@@ -254,8 +292,6 @@ export default function Page() {
     setTimeout(() => setCopiedId(null), 2000);
   }
 
-  const sortedPosts = [...posts].sort((a, b) => a.position - b.position);
-
   return (
     <div className="wrap">
       <header>
@@ -269,7 +305,103 @@ export default function Page() {
           serie Radar de Opinión. Cuando llegue el momento de publicar, copia el
           texto y pégalo en LinkedIn — luego márcalo como publicado.
         </p>
+        <div className="meta-row">
+          <span className="meta-chip">🗂️ {counts.all} artículos en 2 series</span>
+          <span className="meta-chip">
+            ✍️ Voz: primera persona, fundador construyendo en salud + IA
+          </span>
+          <span className="meta-chip">📊 Todas las cifras con fuente enlazada</span>
+        </div>
       </header>
+
+      <div className="toolbar">
+        <div className="toolbar-row">
+          <div className="search-box">
+            <span>🔎</span>
+            <input
+              type="text"
+              placeholder="Buscar por palabra clave, tema o cifra…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <div className="progress-wrap">
+            <span>
+              {counts.published} / {counts.all} publicados
+            </span>
+            <div className="progress-track">
+              <div
+                className="progress-fill"
+                style={{
+                  width: `${counts.all ? Math.round((counts.published / counts.all) * 100) : 0}%`,
+                }}
+              />
+            </div>
+          </div>
+        </div>
+        <div className="filters">
+          <button
+            className={`filter-chip${activeFilter === "all" ? " active" : ""}`}
+            onClick={() => setActiveFilter("all")}
+          >
+            Todos ({counts.all})
+          </button>
+          <button
+            className={`filter-chip${activeFilter === "medicina" ? " active" : ""}`}
+            onClick={() => setActiveFilter("medicina")}
+          >
+            🩺 Noticias médicas ({counts.medicina})
+          </button>
+          <button
+            className={`filter-chip${activeFilter === "politica" ? " active" : ""}`}
+            onClick={() => setActiveFilter("politica")}
+          >
+            🏛️ Política y sistemas ({counts.politica})
+          </button>
+          <button
+            className={`filter-chip${activeFilter === "pending" ? " active" : ""}`}
+            onClick={() => setActiveFilter("pending")}
+          >
+            ⬜ Pendientes ({counts.pending})
+          </button>
+          <button
+            className={`filter-chip${activeFilter === "published" ? " active" : ""}`}
+            onClick={() => setActiveFilter("published")}
+          >
+            ✅ Publicados ({counts.published})
+          </button>
+        </div>
+        {sortedPosts.length > 0 && (
+          <div className="toc">
+            {sortedPosts.map((post, idx) => (
+              <a
+                key={post.id}
+                href={`#card-${idx + 1}`}
+                className={post.status === "published" ? "pub" : ""}
+                title={post.title}
+              >
+                {String(idx + 1).padStart(2, "0")}
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="howto">
+        <div>
+          <b>1 · Lee la noticia</b>Columna izquierda: el hecho, las cifras clave y
+          los enlaces a la fuente original.
+        </div>
+        <div>
+          <b>2 · Copia el artículo</b>Columna derecha: el post completo, listo
+          para pegar en LinkedIn.
+        </div>
+        <div>
+          <b>3 · Programa y marca</b>Prográmalo para una fecha, o márcalo
+          publicado cuando lo pegues — el progreso queda guardado en la base de
+          datos, no solo en tu navegador.
+        </div>
+      </div>
 
       {duePosts.length > 0 && (
         <div className="due-banner">
@@ -284,11 +416,11 @@ export default function Page() {
 
       {error && <div className="due-banner">Error: {error}</div>}
 
-      <div className="toolbar">
+      <div className="list-toolbar">
         <span className="meta-line">
-          {loading ? "Cargando…" : `${posts.length} publicación(es)`}
+          {loading ? "Cargando…" : `${sortedPosts.length} publicación(es)`}
         </span>
-        <button className="btn btn-primary" onClick={openCreateForm}>
+        <button className="btn btn-primary new-post-btn" onClick={openCreateForm}>
           + Nueva publicación
         </button>
       </div>
@@ -296,6 +428,13 @@ export default function Page() {
       {!loading && sortedPosts.length === 0 && (
         <div className="empty">
           Todavía no hay publicaciones. Crea la primera con «+ Nueva publicación».
+        </div>
+      )}
+
+      {!loading && sortedPosts.length > 0 && visibleCount === 0 && (
+        <div className="no-results">
+          No hay artículos que coincidan con tu búsqueda o filtro. Prueba con otra
+          palabra o quita el filtro.
         </div>
       )}
 
@@ -307,9 +446,15 @@ export default function Page() {
             new Date(post.scheduled_at).getTime() <= now;
           const expanded = !!expandedIds[post.id];
           const busy = busyId === post.id;
+          const isPublished = post.status === "published";
+          const hidden = !(matchesFilter(post) && matchesSearch(post));
 
           return (
-            <div className="post-card" key={post.id}>
+            <div
+              className={`post-card${isPublished ? " is-published" : ""}${hidden ? " is-hidden" : ""}`}
+              key={post.id}
+              id={`card-${idx + 1}`}
+            >
               <div className="post-card-top">
                 <div className="post-card-title-row">
                   <span className="pos-num">
@@ -318,6 +463,11 @@ export default function Page() {
                   <span className="post-title">{post.title}</span>
                 </div>
                 <div className="badges">
+                  <span
+                    className={`badge ${post.series === "politica" ? "badge-politica" : "badge-medicina"}`}
+                  >
+                    {SERIES_LABEL[post.series] || SERIES_LABEL.medicina}
+                  </span>
                   {post.category && (
                     <span className="badge badge-category">{post.category}</span>
                   )}
@@ -329,9 +479,13 @@ export default function Page() {
                       {isDue ? "Listo para publicar" : "Programado"}
                     </span>
                   )}
-                  {post.status === "published" && (
-                    <span className="badge badge-published">Publicado</span>
-                  )}
+                  <button
+                    className={`pub-btn${isPublished ? " is-on" : ""}`}
+                    disabled={busy}
+                    onClick={() => togglePublished(post)}
+                  >
+                    {isPublished ? "✅ Publicado" : "☐ Marcar publicado"}
+                  </button>
                 </div>
               </div>
 
@@ -385,24 +539,6 @@ export default function Page() {
                   >
                     🗓️ Programar
                   </button>
-                  {post.status !== "published" && (
-                    <button
-                      className="btn btn-secondary"
-                      disabled={busy}
-                      onClick={() => markPublished(post)}
-                    >
-                      ✅ Marcar publicado
-                    </button>
-                  )}
-                  {post.status === "scheduled" && (
-                    <button
-                      className="btn btn-secondary"
-                      disabled={busy}
-                      onClick={() => clearSchedule(post)}
-                    >
-                      Volver a borrador
-                    </button>
-                  )}
                   <button className="btn btn-secondary" onClick={() => openEditForm(post)}>
                     ✏️ Editar
                   </button>
@@ -458,6 +594,26 @@ export default function Page() {
                   }
                   required
                 />
+              </div>
+              <div className="field">
+                <label>Serie</label>
+                <select
+                  value={formValues.series}
+                  onChange={(e) =>
+                    setFormValues((v) => ({ ...v, series: e.target.value }))
+                  }
+                  style={{
+                    width: "100%",
+                    fontFamily: "inherit",
+                    fontSize: "14px",
+                    padding: "9px 12px",
+                    border: "1px solid var(--line)",
+                    borderRadius: "8px",
+                  }}
+                >
+                  <option value="medicina">🩺 Noticias médicas</option>
+                  <option value="politica">🏛️ Política y sistemas</option>
+                </select>
               </div>
               <div className="field">
                 <label>Categoría / etiqueta</label>
