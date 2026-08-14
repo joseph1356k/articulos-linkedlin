@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { supabase } from "../lib/supabaseClient";
 
 const EMPTY_FORM = {
   title: "",
@@ -114,17 +113,28 @@ export default function Page() {
 
   async function fetchPosts() {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("posts")
-      .select("*")
-      .order("position", { ascending: true });
-    if (error) {
-      setError(error.message);
-    } else {
+    try {
+      const res = await fetch("/api/posts");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error al cargar");
       setError("");
-      setPosts(data || []);
+      setPosts(data.posts || []);
+    } catch (err) {
+      setError(err.message);
     }
     setLoading(false);
+  }
+
+  async function persist(nextPosts) {
+    const res = await fetch("/api/posts", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ posts: nextPosts }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Error al guardar");
+    setPosts(data.posts || []);
+    return data.posts;
   }
 
   useEffect(() => {
@@ -197,33 +207,46 @@ export default function Page() {
     if (!formValues.title.trim() || !formValues.content.trim()) return;
     setSavingForm(true);
     const payload = formValuesToPayload(formValues);
-    if (editingId) {
-      const { error } = await supabase
-        .from("posts")
-        .update(payload)
-        .eq("id", editingId);
-      if (error) setError(error.message);
-    } else {
-      const nextPosition =
-        posts.length > 0 ? Math.max(...posts.map((p) => p.position)) + 1 : 1;
-      const { error } = await supabase
-        .from("posts")
-        .insert({ ...payload, position: nextPosition, status: "draft" });
-      if (error) setError(error.message);
+    const now = new Date().toISOString();
+    try {
+      let nextPosts;
+      if (editingId) {
+        nextPosts = posts.map((p) =>
+          p.id === editingId ? { ...p, ...payload, updated_at: now } : p
+        );
+      } else {
+        const nextPosition =
+          posts.length > 0 ? Math.max(...posts.map((p) => p.position)) + 1 : 1;
+        const newPost = {
+          ...payload,
+          id: crypto.randomUUID(),
+          position: nextPosition,
+          status: "draft",
+          scheduled_at: null,
+          published_at: null,
+          created_at: now,
+          updated_at: now,
+        };
+        nextPosts = [...posts, newPost];
+      }
+      await persist(nextPosts);
+    } catch (err) {
+      setError(err.message);
     }
     setSavingForm(false);
     closeForm();
-    fetchPosts();
   }
 
   async function deletePost(post) {
     if (!window.confirm(`¿Eliminar "${post.title}"? Esta acción no se puede deshacer.`))
       return;
     setBusyId(post.id);
-    const { error } = await supabase.from("posts").delete().eq("id", post.id);
-    if (error) setError(error.message);
+    try {
+      await persist(posts.filter((p) => p.id !== post.id));
+    } catch (err) {
+      setError(err.message);
+    }
     setBusyId(null);
-    fetchPosts();
   }
 
   async function moveBy(post, direction) {
@@ -232,12 +255,17 @@ export default function Page() {
     if (targetIdx < 0 || targetIdx >= sortedPosts.length) return;
     const other = sortedPosts[targetIdx];
     setBusyId(post.id);
-    await Promise.all([
-      supabase.from("posts").update({ position: other.position }).eq("id", post.id),
-      supabase.from("posts").update({ position: post.position }).eq("id", other.id),
-    ]);
+    try {
+      const nextPosts = posts.map((p) => {
+        if (p.id === post.id) return { ...p, position: other.position };
+        if (p.id === other.id) return { ...p, position: post.position };
+        return p;
+      });
+      await persist(nextPosts);
+    } catch (err) {
+      setError(err.message);
+    }
     setBusyId(null);
-    fetchPosts();
   }
 
   function toggleExpanded(id) {
@@ -253,14 +281,16 @@ export default function Page() {
     if (!scheduleValue) return;
     setBusyId(post.id);
     const iso = new Date(scheduleValue).toISOString();
-    const { error } = await supabase
-      .from("posts")
-      .update({ status: "scheduled", scheduled_at: iso })
-      .eq("id", post.id);
-    if (error) setError(error.message);
+    try {
+      const nextPosts = posts.map((p) =>
+        p.id === post.id ? { ...p, status: "scheduled", scheduled_at: iso } : p
+      );
+      await persist(nextPosts);
+      setScheduleOpenId(null);
+    } catch (err) {
+      setError(err.message);
+    }
     setBusyId(null);
-    setScheduleOpenId(null);
-    fetchPosts();
   }
 
   async function togglePublished(post) {
@@ -269,10 +299,13 @@ export default function Page() {
     const patch = goingLive
       ? { status: "published", published_at: new Date().toISOString() }
       : { status: "draft", scheduled_at: null, published_at: null };
-    const { error } = await supabase.from("posts").update(patch).eq("id", post.id);
-    if (error) setError(error.message);
+    try {
+      const nextPosts = posts.map((p) => (p.id === post.id ? { ...p, ...patch } : p));
+      await persist(nextPosts);
+    } catch (err) {
+      setError(err.message);
+    }
     setBusyId(null);
-    fetchPosts();
   }
 
   async function copyPost(post) {
